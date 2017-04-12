@@ -59,3 +59,62 @@ export CUDA_VISIBLE_DEVICES=""  # Make GPU invisible
 # run code
 unset CUDA_VISIBLE_DEVICES      # Return to normal
 ```
+
+# Caffe
+
+## Installing Kernel Patch tips
+```bash
+sudo apt install gcc-4.9
+vim Makefile
+r/gcc/gcc-4.9
+```
+
+## OpenCL
+### Find OpenCL when building Caffe
+``` bash
+vim cmake/Modules/FindOpenCL.cmake
+```
+```
+FIND_PATH(OPENCL_INCLUDE_DIRS CL/cl.h PATHS ${_OPENCL_INC_CAND} "/usr/local/cuda/include" "/opt/intel/opencl/include/")
+FIND_PATH(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp PATHS ${_OPENCL_INC_CAND} "/usr/local/cuda/include" "/opt/intel/opencl/include/")
+```
+``` bash
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/intel/opencl/
+```
+
+## ViennaCL
+```bash
+cd
+git clone https://github.com/viennacl/viennacl-dev/tree/release-1.7.1
+cd viennacl-dev
+sudo cp -r viennacl /usr/local/include
+```
+
+## BVLC CAFFE Python Interface
+``` bash
+pip install -U scikit-image
+pip install tensorflow
+```
+
+## Running inference using pretrained models
+
+```bash
+vim caffe/python/caffe/io.py    #Fix bug in io.py
+```
+```python
+if ms != self.inputs[in_][1:]:
+		print(self.inputs[in_])
+		in_shape = self.inputs[in_][1:]
+		m_min, m_max = mean.min(), mean.max()
+		normal_mean = (mean - m_min) / (m_max - m_min)
+		mean = resize_image(normal_mean.transpose((1,2,0)),in_shape[1:]).transpose((2,0,1))
+		#raise ValueError('Mean shape incompatible with input shape.')                      # Original line
+```
+```bash
+cd caffe/python
+python classify.py ~/image_data/architecture-benchmark/ output_file --pretrained_model ../models/bvlc_googlenet/bvlc_googlenet.caffemodel --model_def="/home/ahjiang/src/demos/bvlc_caffe_cpu/caffe/models/bvlc_googlenet/deploy.prototxt" --mean_file="caffe/imagenet/ilsvrc_2012_mean.npy"
+python classify.py ~/image_data/architecture-benchmark/ output_file --pretrained_model ../models/bvlc_googlenet/bvlc_googlenet.caffemodel \
+                                                                    --model_def="/home/ahjiang/src/demos/bvlc_caffe_opencl/caffe/models/bvlc_googlenet/deploy.prototxt" \
+                                                                    --mean_file="caffe/imagenet/ilsvrc_2012_mean.npy"
+```
+
