@@ -92,6 +92,8 @@ sudo cp -r viennacl /usr/local/include
 
 ## BVLC CAFFE Python Interface
 ``` bash
+make pycaffe
+export PYTHONPATH=/path/to/caffe/python/
 pip install -U scikit-image
 pip install tensorflow
 ```
@@ -110,11 +112,33 @@ if ms != self.inputs[in_][1:]:
 		mean = resize_image(normal_mean.transpose((1,2,0)),in_shape[1:]).transpose((2,0,1))
 		#raise ValueError('Mean shape incompatible with input shape.')                      # Original line
 ```
+
+### GoogLeNet
 ```bash
 cd caffe/python
-python classify.py ~/image_data/architecture-benchmark/ output_file --pretrained_model ../models/bvlc_googlenet/bvlc_googlenet.caffemodel --model_def="/home/ahjiang/src/demos/bvlc_caffe_cpu/caffe/models/bvlc_googlenet/deploy.prototxt" --mean_file="caffe/imagenet/ilsvrc_2012_mean.npy"
 python classify.py ~/image_data/architecture-benchmark/ output_file --pretrained_model ../models/bvlc_googlenet/bvlc_googlenet.caffemodel \
-                                                                    --model_def="/home/ahjiang/src/demos/bvlc_caffe_opencl/caffe/models/bvlc_googlenet/deploy.prototxt" \
+                                                                    --model_def="../models/bvlc_googlenet/deploy.prototxt" \
                                                                     --mean_file="caffe/imagenet/ilsvrc_2012_mean.npy"
 ```
 
+### ResNet
+[Links](https://github.com/KaimingHe/deep-residual-networks) to .caffemodel files
+```bash
+git clone https://github.com/KaimingHe/deep-residual-networks.git
+cd deep-residual-networks
+cp prototxt/ResNet-50-deploy.prototxt /path/to/models/
+```
+```bash
+cd caffe/python
+python classify.py ~/image_data/architecture-benchmark/ output_file --pretrained_model ../models/ResNet/ResNet-50-model.caffemodel \
+                                                                    --model_def="../models/ResNet-50-deploy.prototxt" \
+                                                                    --mean_file="caffe/imagenet/ilsvrc_2012_mean.npy"
+```
+
+## Installing bvlc caffe on Orca
+
+sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler
+sudo apt-get install --no-install-recommends libboost-all-dev
+sudo apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev
+sudo apt-get install libopenblas-dev
+sudo apt-get install libatlas-base-dev
