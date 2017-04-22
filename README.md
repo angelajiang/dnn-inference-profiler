@@ -102,8 +102,6 @@ pip install tensorflow
 
 ```bash
 vim caffe/python/caffe/io.py    #Fix bug in io.py
-```
-```python
 if ms != self.inputs[in_][1:]:
 		print(self.inputs[in_])
 		in_shape = self.inputs[in_][1:]
@@ -111,6 +109,14 @@ if ms != self.inputs[in_][1:]:
 		normal_mean = (mean - m_min) / (m_max - m_min)
 		mean = resize_image(normal_mean.transpose((1,2,0)),in_shape[1:]).transpose((2,0,1))
 		#raise ValueError('Mean shape incompatible with input shape.')                      # Original line
+
+vim caffe/python/caffe/classifier.py    #Only time forward pass
+import time
+
+start = time.time()
+out = self.forward_all(**{self.inputs[0]: caffe_in})																		# Original line
+print("Core in %.2f s." % (time.time() - start))
+
 ```
 
 ### GoogLeNet
@@ -130,15 +136,24 @@ cp prototxt/ResNet-50-deploy.prototxt /path/to/models/
 ```
 ```bash
 cd caffe/python
+python classify.py ~/image-data/architecture-benchmark/ output_file --pretrained_model ../models/ResNet/ResNet-50-model.caffemodel \
+                                                                    --model_def="../models/ResNet/ResNet-50-deploy.prototxt" \
+                                                                    --mean_file="caffe/imagenet/ilsvrc_2012_mean.npy"
 python classify.py ~/image_data/architecture-benchmark/ output_file --pretrained_model ../models/ResNet/ResNet-50-model.caffemodel \
-                                                                    --model_def="../models/ResNet-50-deploy.prototxt" \
+                                                                    --model_def="../models/ResNet/ResNet-50-deploy.prototxt" \
+                                                                    --mean_file="caffe/imagenet/ilsvrc_2012_mean.npy"
+
+python classify.py ~/image_data/architecture-benchmark/ output_file --pretrained_model ../models/ResNet/ResNet-50-model.caffemodel \
+                                                                    --model_def="../models/mkl2017_resnet_50/solver.prototxt" \
                                                                     --mean_file="caffe/imagenet/ilsvrc_2012_mean.npy"
 ```
 
 ## Installing bvlc caffe on Orca
 
+```bash
 sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler
 sudo apt-get install --no-install-recommends libboost-all-dev
 sudo apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev
 sudo apt-get install libopenblas-dev
 sudo apt-get install libatlas-base-dev
+```
