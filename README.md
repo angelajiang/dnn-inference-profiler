@@ -64,6 +64,7 @@ unset CUDA_VISIBLE_DEVICES      # Return to normal
 
 ## Installing Kernel Patch tips
 ```bash
+> kernel/bounds.c:1:0: error: code model kernel does not support PIC mode
 sudo apt install gcc-4.9
 vim Makefile
 r/gcc/gcc-4.9
